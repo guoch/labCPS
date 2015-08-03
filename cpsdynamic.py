@@ -24,6 +24,9 @@ class TestHandle(ContentHandler):
 如何切分 
 两种渠道 一种为hive增加partition的方法
 另外一种方法为 mv操作，但是有必要mv吗 移动究竟是否有价值 因为可以事先得到查询的列表
+问题是优化器选择的直接作为mapreduce输入而不是用了mapreduce下的某个文件夹
+mv是否可以将小表格load进memory里面
+根据某个attribute得到所有属于该属性的数据
 
 ''' 
 
