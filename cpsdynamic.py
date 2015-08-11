@@ -11,7 +11,7 @@ sys.setdefaultencoding('utf-8')
 #from thrift.transport import TTransport  
 #from thrift.protocol import TBinaryProtocol  
 import pyhs2
-conn=pyhs2.connect(host='ubuntu1',port=10000,authMechanism='PLAIN',user='hive',password='hive',database='default',)
+conn=pyhs2.connect(host='ubuntu1',port=10000,authMechanism='PLAIN',user='scidb',password='hive',database='default',)
 
 '''
 class TestHandle(ContentHandler):
@@ -70,6 +70,8 @@ def decode(udfstring):
     udfword=udfstring[0:4]+"'"+udfstring[4:]+"'"
     create_sql="insert overwrite table lineitem_lab2 partition ("+udfword+") select * FROM lineitem_tmp where "+sql_timeline+" and "+sql_discount+" and "+sql_shipmode
     return create_sql
+
+
 
 
 
@@ -148,9 +150,9 @@ def renamePartition():
     '''
 
 def createPartition():
-    cur=conn.cursor()
-    cur.execute('show partitions lineitem_lab2')
-    result=cur.fetch()
+    #cur=conn.cursor()
+    #cur.execute('show partitions lineitem_lab2')
+    #result=cur.fetch()
     result=[
 'udf=1971-01-01|1994-01-01|0.00|0.05|MAIL|0',
 'udf=1971-01-01|1994-01-01|0.00|0.05|OTHE|0',
@@ -179,12 +181,39 @@ def createPartition():
 'udf=1997-09-02|2015-08-01|0.07|1.00|MAIL|0',
 'udf=1997-09-02|2015-08-01|0.07|1.00|OTHE|0',
 'udf=1997-09-02|2015-08-01|0.07|1.00|SHIP|0']
-    
+
     for t in result:
-        getsql=decode(t[0])
+        getsql=decode(t)
         cur2=conn.cursor()
         cur2.execute(getsql)
 
+def decode_attribute(udfstring):
+    begin_time=udfstring[4:14]
+    end_time=udfstring[15:25]
+    low_discount=udfstring[26:30]
+    high_discount=udfstring[31:35]
+    shipmode=udfstring[36:40]
+    flag=udfstring[41:42]
+    atttibutes=[begin_time,end_time,low_discount,high_discount,shipmode,flag]
+    return atttibutes
+
+#由于end_time为不可到达的上界小于等于即可
+def scanPartition(start_time,end_time):
+    cur_scan=conn.cursor()
+    cur_scan.execute('show partitions lineitem_lab2')
+    result2=cur_scan.fetch()
+    scanlist=[]
+    for singlelist in result2:
+        partname=decode_attribute(singlelist[0])
+        if partname[0]>=start_time and partname[1]<=end_time:
+            scanlist.append(singlelist)
+        else:
+            pass
+    return scanlist 
+
+def getScanSql(scanlist):
+    
+    
 
 
 
