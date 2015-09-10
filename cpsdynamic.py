@@ -48,36 +48,6 @@ def encodePartition(shipdate_start,shipdate_end,discount_min,discount_max,shipmo
 
 
 
-
-def decode(udfstring):
-    oldsql=udfstring[0:4]+"'"+udfstring[4:]+"'"
-    begin_time=udfstring[4:14]
-    end_time=udfstring[15:25]
-    low_discount=udfstring[26:30]
-    high_discount=udfstring[31:35]
-    shipmode=udfstring[36:40]
-    flag=udfstring[41:42]
-    #(L_SHIPDATE>='1994-01-01' and L_SHIPDATE<'1997-09-02')
-    sql_timeline="(L_SHIPDATE>='"+begin_time+"' and L_SHIPDATE<'"+end_time+"')"
-    #(L_DISCOUNT>=0.05 and L_DISCOUNT<0.07)
-    sql_discount="(L_DISCOUNT>="+low_discount+" and L_DISCOUNT<"+high_discount+")"
-    #(L_SHIPMODE!='SHIP' and L_SHIPMODE!='MAIL')   L_SHIPMODE='SHIP'
-    if shipmode=='OTHE':
-        sql_shipmode="(L_SHIPMODE!='SHIP' and L_SHIPMODE!='MAIL')"
-    else:
-        sql_shipmode="L_SHIPMODE='"+shipmode+"'"
-    #insert overwrite table lineitem_lab2 partition (UDF='1994-01-01|1997-09-02|0.05|0.07|OTHET') select * FROM lineitem_tmp where (L_SHIPDATE>='1994-01-01' and L_SHIPDATE<'1997-09-02') and (L_DISCOUNT>=0.05 and L_DISCOUNT<0.07) and (L_SHIPMODE!='SHIP' and L_SHIPMODE!='MAIL' );
-    udfword=udfstring[0:4]+"'"+udfstring[4:]+"'"
-    create_sql="insert overwrite table lineitem_lab2 partition ("+udfword+") select * FROM lineitem_tmp where "+sql_timeline+" and "+sql_discount+" and "+sql_shipmode
-    return create_sql
-
-
-
-
-
-def judgeConflict():
-    return
-
 def CPSModel():
     weight=0
     return 0
@@ -197,6 +167,39 @@ def decode_attribute(udfstring):
     atttibutes=[begin_time,end_time,low_discount,high_discount,shipmode,flag]
     return atttibutes
 
+def decode(udfstring):
+    oldsql=udfstring[0:4]+"'"+udfstring[4:]+"'"
+    begin_time=udfstring[4:14]
+    end_time=udfstring[15:25]
+    low_discount=udfstring[26:30]
+    high_discount=udfstring[31:35]
+    shipmode=udfstring[36:40]
+    flag=udfstring[41:42]
+    #(L_SHIPDATE>='1994-01-01' and L_SHIPDATE<'1997-09-02')
+    sql_timeline="(L_SHIPDATE>='"+begin_time+"' and L_SHIPDATE<'"+end_time+"')"
+    #(L_DISCOUNT>=0.05 and L_DISCOUNT<0.07)
+    sql_discount="(L_DISCOUNT>="+low_discount+" and L_DISCOUNT<"+high_discount+")"
+    #(L_SHIPMODE!='SHIP' and L_SHIPMODE!='MAIL')   L_SHIPMODE='SHIP'
+    if shipmode=='OTHE':
+        sql_shipmode="(L_SHIPMODE!='SHIP' and L_SHIPMODE!='MAIL')"
+    else:
+        sql_shipmode="L_SHIPMODE='"+shipmode+"'"
+    #insert overwrite table lineitem_lab2 partition (UDF='1994-01-01|1997-09-02|0.05|0.07|OTHET') select * FROM lineitem_tmp where (L_SHIPDATE>='1994-01-01' and L_SHIPDATE<'1997-09-02') and (L_DISCOUNT>=0.05 and L_DISCOUNT<0.07) and (L_SHIPMODE!='SHIP' and L_SHIPMODE!='MAIL' );
+    udfword=udfstring[0:4]+"'"+udfstring[4:]+"'"
+    create_sql="insert overwrite table lineitem_lab2 partition ("+udfword+") select * FROM lineitem_tmp where "+sql_timeline+" and "+sql_discount+" and "+sql_shipmode
+    return create_sql
+
+def judgeConflict(udfstring1,udfstring2):
+    udflist1=decode_attribute(udfstring1)
+    udflist2=decode_attribute(udfstring2)
+    if udflist1[5]==udflist2[5]:
+        return false
+    else:
+        
+    # This is by wuzhigang
+    
+    return
+
 #由于end_time为不可到达的上界小于等于即可
 def scanPartition(start_time,end_time):
     cur_scan=conn.cursor()
@@ -212,7 +215,13 @@ def scanPartition(start_time,end_time):
     return scanlist 
 
 def getScanSql(scanlist):
-    
+    scanPartition('1994-02-06','1995-07-08')
+
+
+
+
+
+
     
 
 
