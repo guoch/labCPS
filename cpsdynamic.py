@@ -189,15 +189,59 @@ def decode(udfstring):
     create_sql="insert overwrite table lineitem_lab2 partition ("+udfword+") select * FROM lineitem_tmp where "+sql_timeline+" and "+sql_discount+" and "+sql_shipmode
     return create_sql
 
+def getborderString(udfstring):
+    oldsql=udfstring[0:4]+"'"+udfstring[4:]+"'"
+    begin_time=udfstring[4:14]
+    end_time=udfstring[15:25]
+    low_discount=udfstring[26:30]
+    high_discount=udfstring[31:35]
+    shipmode=udfstring[36:40]
+    flag=udfstring[41:42]
+    #(L_SHIPDATE>='1994-01-01' and L_SHIPDATE<'1997-09-02')
+    sql_timeline="(L_SHIPDATE>='"+begin_time+"' and L_SHIPDATE<'"+end_time+"')"
+    #(L_DISCOUNT>=0.05 and L_DISCOUNT<0.07)
+    sql_discount="(L_DISCOUNT>="+low_discount+" and L_DISCOUNT<"+high_discount+")"
+    #(L_SHIPMODE!='SHIP' and L_SHIPMODE!='MAIL')   L_SHIPMODE='SHIP'
+    if shipmode=='OTHE':
+        sql_shipmode="(L_SHIPMODE!='SHIP' and L_SHIPMODE!='MAIL')"
+    else:
+        sql_shipmode="L_SHIPMODE='"+shipmode+"'"
+    #insert overwrite table lineitem_lab2 partition (UDF='1994-01-01|1997-09-02|0.05|0.07|OTHET') select * FROM lineitem_tmp where (L_SHIPDATE>='1994-01-01' and L_SHIPDATE<'1997-09-02') and (L_DISCOUNT>=0.05 and L_DISCOUNT<0.07) and (L_SHIPMODE!='SHIP' and L_SHIPMODE!='MAIL' );
+    udfword=udfstring[0:4]+"'"+udfstring[4:]+"'"
+    borderstring=[udfword,sql_timeline,sql_discount,sql_shipmode]
+    return borderstring
+
+
+
+
+
 def judgeConflict(udfstring1,udfstring2):
     udflist1=decode_attribute(udfstring1)
     udflist2=decode_attribute(udfstring2)
     if udflist1[5]==udflist2[5]:
         return false
     else:
+        if (udflist1[0]<udflist2[0] and udflist1[1]>udflist2[0]) or (udflist2[0]<udflist1[0] and udflist2[1]<udflist1[0]):
+            return true
+        else:
+            return false
+
+
         
     # This is by wuzhigang
     
+    return
+
+def calrate(table1,table2,timebegin1,timeend1,timebegin2,timeend2):
+    string1="select count(*) from "+table1
+    string2="select count(*) from "+table2
+    ratecur=conn.cursor()
+    ratecur.execute(getsql)
+
+
+
+
+
     return
 
 #由于end_time为不可到达的上界小于等于即可
@@ -216,6 +260,7 @@ def scanPartition(start_time,end_time):
 
 def getScanSql(scanlist):
     scanPartition('1994-02-06','1995-07-08')
+
 
 
 
