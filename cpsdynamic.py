@@ -224,19 +224,112 @@ def judgeConflict(udfstring1,udfstring2):
         if (udflist1[0]<udflist2[0] and udflist1[1]>udflist2[0]) or (udflist2[0]<udflist1[0] and udflist2[1]<udflist1[0]):
             return true
         else:
-            return false
-
-
-        
+            return false      
     # This is by wuzhigang
     
     return
+'''
+#include <iostream>
+ using namespace std;
+
+ #define MAX(a, b) ((a >= b) ? a : b)
+ #define MIN(a, b) ((a <= b) ? a : b)
+
+ struct INTERVAL //区间
+{
+float left;
+ float right;
+ };
+
+ struct RECT //矩形
+{
+float left;
+ float right;
+ float top;
+ float bottom;
+ };
+
+ bool interval_intersect(INTERVAL t1, INTERVAL t2, INTERVAL &t3) //求区间t1和t2的交（一维）
+{
+if (t1.right < t2.left || t1.left > t2.right)
+ return false; 
+ else 
+ {
+ t3.left = MAX(t1.left, t2.left);
+ t3.right = MIN(t1.right, t2.right);
+ return true; 
+ }
+ }
+
+'''
+def intersect(t1_left,t1_right,t2_left,t2_right):
+	if(t1_right<t2_left or t1_left>t2_right):
+		return false  #no conflict
+	else:
+		t3_left=MAX(t1_left,t2_left)
+		t3_right=MIN(t1_right,t2_right)
+		return true
+
+
+def rect_intersect(t1_left,t1_right,t1_low,t1_high,t2_left,t2_right,t2_low,t2_high):
+	if intersect(t1_left,t1_right,t2_left,t2_right) and intersect(t1_low,t1_high,t2_low,t2_high):
+		return true
+	else:
+		return false
+
+#该函数用于判断两个能否覆盖一个矩形
+def proper_intersect(t1_left,t1_right,t2_left,t2_right,query_left,query_right):
+	if(t1_right==t2_left and t1_left<=query_left and t2_right>=query_right) or (t1_left==t2_right and t2_left<=query_left and t1_right>=query_right):
+		retun true
+	else:
+		return false
+
+
+
+
+'''
+ bool rect_intersect(RECT r1, RECT r2, RECT &r3) //矩形求交（二维）
+{
+INTERVAL t1, t2, t3, t4, t5, t6;
+
+ t1.left = r1.left;
+ t1.right = r1.right;
+ t2.left = r2.left;
+ t2.right = r2.right;
+ t4.left = r1.top;
+ t4.right = r1.bottom;
+ t5.left = r2.top;
+ t5.right = r2.bottom;
+ if (interval_intersect(t1, t2, t3) && interval_intersect(t4, t5, t6))
+ {
+ r3.left = t3.left;
+ r3.right = t3.right;
+ r3.top = t6.left;
+ r3.bottom = t6.right;
+ return true;
+ }
+ return false;
+ }
+
+
+
+'''
+
+
+
+'''
+
+def coverxy(x,y):
+	return
+	
 
 def calrate(table1,table2,timebegin1,timeend1,timebegin2,timeend2):
     string1="select count(*) from "+table1
     string2="select count(*) from "+table2
     ratecur=conn.cursor()
-    ratecur.execute(getsql)
+    rs=ratecur.execute(getsql)
+    
+
 
 
 
